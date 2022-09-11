@@ -3,12 +3,17 @@
     <header>
       <div class="login banner" v-if="isLogin">
         <van-row></van-row>
-        <van-row>
-          <van-col span="12">
+        <van-row
+          type="flex"
+          justify="center"
+          align="center"
+          style="height: 100%"
+        >
+          <van-col span="11">
             <van-row
               type="flex"
               style="height: 100%"
-              justify="space-around"
+              justify="center"
               align="center"
             >
               <van-image
@@ -18,17 +23,12 @@
                 src="https://img1.baidu.com/it/u=4064025444,3686295405&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1662829200&t=fae69d519c7980030e29d0d8a70f9a33"
               >
               </van-image>
-              <span class="mobile">1311111111</span>
+              <span class="mobile">{{ userInfo.name }}</span>
             </van-row>
           </van-col>
-          <van-col span="7"></van-col>
+          <van-col span="8"></van-col>
           <van-col span="5">
-            <van-row
-              type="flex"
-              justify="center"
-              align="center"
-              style="height: 100%"
-            >
+            <van-row>
               <van-button size="mini" round class="editBtn"
                 >编辑按钮</van-button
               >
@@ -38,16 +38,16 @@
         <van-row>
           <van-grid :border="false" class="grid">
             <van-grid-item text="头条">
-              <template #icon> 111 </template>
+              <template #icon> {{ userInfo.art_count }} </template>
             </van-grid-item>
             <van-grid-item text="粉丝">
-              <template #icon> 111 </template>
+              <template #icon> {{ userInfo.fans_count }} </template>
             </van-grid-item>
             <van-grid-item text="关注">
-              <template #icon> 111 </template>
+              <template #icon> {{ userInfo.follow_count }} </template>
             </van-grid-item>
             <van-grid-item text="获赞">
-              <template #icon> 111 </template>
+              <template #icon> {{ userInfo.like_count }} </template>
             </van-grid-item>
           </van-grid>
         </van-row>
@@ -92,16 +92,31 @@
 <script>
 import { mapGetters } from 'vuex'
 import logoutSrc from '../../assets/images/mobile.png'
+import { getUserInfo } from '@/api/user'
 export default {
   data() {
     return {
-      logoutSrc
+      logoutSrc,
+      userInfo: {}
     }
   },
   computed: {
     ...mapGetters(['isLogin'])
   },
+  created() {
+    if (this.isLogin) this.getUserInfo()
+  },
   methods: {
+    async getUserInfo() {
+      try {
+        const { data } = await getUserInfo()
+        this.userInfo = data
+        console.log(this.userInfo)
+      } catch (error) {
+        if (error?.status) return console.log(error)
+        throw error
+      }
+    },
     logout() {
       this.$dialog
         .alert({
@@ -165,6 +180,7 @@ export default {
   .mobile {
     font-size: 30px;
     color: #fff;
+    margin-left: 5px;
   }
   .van-row {
     height: 100%;
