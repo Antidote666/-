@@ -10,23 +10,49 @@
       <van-tab v-for="item in channel" :key="item.id" :title="item.name">
         <article-list :id="item.id"></article-list>
       </van-tab>
-      <span class="toutiao toutiao-gengduo"></span>
+      <span class="toutiao toutiao-gengduo" @click="isPopupShow = true"></span>
     </van-tabs>
+    <van-popup
+      close-icon-position="top-left"
+      closeable
+      v-model="isPopupShow"
+      position="bottom"
+      :style="{ height: '100%' }"
+    >
+      <channel-edit
+        :channel="channel"
+        :active-name.sync="activeName"
+        @delChannel="delChannel"
+      ></channel-edit>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import { getChannelAPI } from '@/api/channel'
 import ArticleList from './components/article-list.vue'
+import ChannelEdit from './components/channel-edit.vue'
 export default {
   data() {
     return {
-      active: 2,
-      channel: []
+      active: 0,
+      channel: [],
+      isPopupShow: false
     }
   },
   created() {
     this.getChannelAPI()
+  },
+  computed: {
+    activeName: {
+      set(val) {
+        this.active = this.channel.findIndex((item) => item.name === val)
+        this.isPopupShow = false
+      },
+      get() {
+        return this.channel[this.active]?.name
+      }
+    }
   },
   methods: {
     async getChannelAPI() {
@@ -39,10 +65,15 @@ export default {
       } catch (error) {
         if (!error.status) throw error
       }
+    },
+    delChannel(name) {
+      console.log(1)
+      this.channel = this.channel.filter((item) => item.name !== name)
     }
   },
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   }
 }
 </script>
