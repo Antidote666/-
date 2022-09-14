@@ -20,18 +20,21 @@
       :style="{ height: '100%' }"
     >
       <channel-edit
+        v-if="isPopupShow"
         :channel="channel"
-        :active-name.sync="activeName"
+        :active-id.sync="activeId"
         @delChannel="delChannel"
+        @addChannel="addChannel"
       ></channel-edit>
     </van-popup>
   </div>
 </template>
 
 <script>
-import { getChannelAPI } from '@/api/channel'
+import { getChannelAPI, delChannelAPI, editChannelAPI } from '@/api/channel'
 import ArticleList from './components/article-list.vue'
 import ChannelEdit from './components/channel-edit.vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 export default {
   data() {
     return {
@@ -41,18 +44,24 @@ export default {
     }
   },
   created() {
-    this.getChannelAPI()
+    if (!this.isLogin && this.myChannels.length) {
+      this.channel = this.myChannels
+    } else {
+      this.getChannelAPI()
+    }
   },
   computed: {
-    activeName: {
+    activeId: {
       set(val) {
-        this.active = this.channel.findIndex((item) => item.name === val)
+        this.active = this.channel.findIndex((item) => item.id === val)
         this.isPopupShow = false
       },
       get() {
-        return this.channel[this.active]?.name
+        return this.channel[this.active]?.id
       }
-    }
+    },
+    ...mapGetters(['isLogin']),
+    ...mapState(['myChannels'])
   },
   methods: {
     async getChannelAPI() {
@@ -66,10 +75,30 @@ export default {
         if (!error.status) throw error
       }
     },
-    delChannel(name) {
-      console.log(1)
-      this.channel = this.channel.filter((item) => item.name !== name)
-    }
+    async delChannel(id, curId) {
+      try {
+        this.channel = this.channel.filter((item) => item.id !== id)
+        if (this.isLogin) {
+          await delChannelAPI(id)
+        } else {
+          this.SET_MY_CHANNELS(this.channel)
+        }
+        this.active = this.channel.findIndex((item) => item.id === curId)
+        this.$toast.success('删除频道成功')
+      } catch (error) {}
+    },
+    async addChannel(item) {
+      try {
+        this.channel.push(item)
+        if (this.isLogin) {
+          await editChannelAPI(item.id, this.channel.length)
+        } else {
+          this.SET_MY_CHANNELS(this.channel)
+        }
+        this.$toast.success('添加频道成功')
+      } catch (error) {}
+    },
+    ...mapMutations(['SET_MY_CHANNELS'])
   },
   components: {
     ArticleList,

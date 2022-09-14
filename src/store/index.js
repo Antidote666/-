@@ -9,13 +9,14 @@ export default new Vuex.Store({
     createPersistedState({
       key: 'HEIMATOUTIAO_TOKEN',
       storage: localStorage,
-      reducer(tokenObj) {
-        return tokenObj
+      reducer({ tokenObj, myChannels }) {
+        return { tokenObj, myChannels }
       }
     })
   ],
   state: {
-    tokenObj: {}
+    tokenObj: {},
+    myChannels: []
   },
   getters: {
     isLogin: (state) => !!state.tokenObj.token
@@ -24,6 +25,9 @@ export default new Vuex.Store({
     SET_TOKEN(state, token) {
       state.tokenObj = token
       console.log(token)
+    },
+    SET_MY_CHANNELS(state, channel) {
+      state.myChannels = channel
     }
   },
   actions: {},

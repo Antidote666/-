@@ -12,12 +12,12 @@
     <div class="my-pannel">
       <van-grid :column-num="4" :gutter="10" :border="false">
         <van-grid-item
-          v-for="item in channel"
-          :class="{ active: item.name == activeName }"
+          v-for="(item, index) in channel"
+          :class="{ active: item.id == activeId }"
           :key="item.id"
-          :icon="isEdit && item.name != activeName ? 'cross' : ''"
+          :icon="isEdit && item.id != activeId ? 'cross' : ''"
           :text="item.name"
-          @click="gridClick(item)"
+          @click="gridClick(item, index)"
         >
         </van-grid-item>
       </van-grid>
@@ -30,6 +30,7 @@
           :key="item.id"
           icon="plus"
           :text="item.name"
+          @click="addClick(item)"
         >
         </van-grid-item>
       </van-grid>
@@ -45,8 +46,8 @@ export default {
       type: Array,
       default: () => []
     },
-    activeName: {
-      type: String,
+    activeId: {
+      type: Number,
       required: true
     }
   },
@@ -74,12 +75,15 @@ export default {
         console.log(this.allChannel)
       } catch (error) {}
     },
-    gridClick({ name }) {
-      if (this.isEdit && name !== this.activeName) {
-        this.$emit('delChannel', name)
+    gridClick({ id }) {
+      if (this.isEdit && id !== this.activeId) {
+        this.$emit('delChannel', id, this.activeId)
       } else {
-        this.$emit('update:activeName', name)
+        this.$emit('update:activeId', id)
       }
+    },
+    addClick(item) {
+      this.$emit('addChannel', item)
     }
   }
 }
